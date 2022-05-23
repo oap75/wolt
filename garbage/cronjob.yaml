@@ -1,0 +1,40 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: garbage-collection
+  namespace: registry
+spec:
+  schedule: "* */8 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: garbage-collection
+          labels:
+            app: garbage-collection
+        spec:
+          volumes:
+            - name: node
+              persistentVolumeClaim:
+                claimName: nfs 
+            - name: config
+              configMap:
+                name: docker-registry
+                items:
+                  - key: registry-config.yml
+                    path: config.yml
+          containers:
+            - name: garbage-collection
+              image: registry:2.6.2 
+              imagePullPolicy: Always
+              volumeMounts:
+                - name: config
+                  mountPath: /etc/docker/registry
+                  readOnly: true
+                - name: node
+                  mountPath: /var/lib/registry
+              command: ["registry", "garbage-collect", "--dry-run", "/etc/docker/registry/config.yml"]
+          restartPolicy: Never

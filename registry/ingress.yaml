@@ -1,0 +1,36 @@
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name:  docker-registry
+    namespace: registry
+    annotations:
+      ingress.kubernetes.io/from-to-www-redirect: "true"
+      nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+      nginx.org/client-max-body-size: "0m"
+      nginx.org/client-max-body-size: "0m"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0m"
+      nginx.ingress.kubernetes.io/client-max-body-size: "0m"
+      nginx.ingress.kubernetes.io/affinity: cookie #(https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/affinity/cookie/README.md)
+      nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+      nginx.ingress.kubernetes.io/session-cookie-name: "route"
+      nginx.ingress.kubernetes.io/session-cookie-conditional-samesite-none: "true"
+    
+  spec:
+    ingressClassName: nginx
+    rules:
+      - host: registry-wolt.incitedev.org
+        http:
+          paths:
+            - backend:
+                service:
+                  name: docker-registry
+                  port:
+                    number: 5000
+              path: "/"
+              pathType: Prefix
+
+    tls:
+      - hosts:
+        - registry-wolt.incitedev.org
+        secretName: docker-registry-tls
