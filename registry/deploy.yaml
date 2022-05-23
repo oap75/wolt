@@ -16,7 +16,7 @@ spec:
       volumes:
       - name: node
         persistentVolumeClaim:
-          claimName: nfs #
+          claimName: nfs 
       - name: config
         configMap:
           name: docker-registry
